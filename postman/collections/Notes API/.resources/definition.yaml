@@ -1,0 +1,3 @@
+$kind: collection
+name: Notes API
+description: Collection for testing the Notes API built with Express.js

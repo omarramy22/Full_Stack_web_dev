@@ -1,0 +1,27 @@
+$kind: http-request
+name: Delete Note
+method: DELETE
+url: 'http://localhost:3001/api/notes/1'
+order: 1000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      // Test 1: Status code is 204
+      pm.test("Status code is 204", function () {
+          pm.response.to.have.status(204);
+      });
+
+      // Test 2: Response body is empty
+      pm.test("Response body is empty", function () {
+          pm.expect(pm.response.text()).to.be.empty;
+      });
+
+      // Test 3: Verify the note was actually deleted (GET returns 404)
+      pm.test("Note is actually deleted (GET returns 404)", function (done) {
+          pm.sendRequest("http://localhost:3001/api/notes/1", function (err, res) {
+              pm.expect(err).to.be.null;
+              pm.expect(res).to.have.property("code", 404);
+              done();
+          });
+      });

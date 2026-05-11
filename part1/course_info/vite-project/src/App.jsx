@@ -1,37 +1,63 @@
-import { useState } from 'react'
+import { useState, useEffect} from 'react'
+import axios from 'axios'
+import Filter from './components/search'
+import countriesService from './services/countries'
 
 const App = () => {
-  const anecdotes = [
-    'If it hurts, do it more often.',
-    'Adding manpower to a late software project makes it later!',
-    'The first 90 percent of the code accounts for the first 90 percent of the development time...The remaining 10 percent of the code accounts for the other 90 percent of the development time.',
-    'Any fool can write code that a computer can understand. Good programmers write code that humans can understand.',
-    'Premature optimization is the root of all evil.',
-    'Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it.',
-    'Programming without an extremely heavy use of console.log is same as if a doctor would refuse to use x-rays or blood tests when diagnosing patients.',
-    'The only way to go fast, is to go well.'
-  ]
-  const votes = [0, 0, 0, 0, 0, 0, 0, 0]
-   
-  const [selected, setSelected] = useState(0)
-  const [vote, setVote] = useState(votes)
+  const [countries, setCountries] = useState([])
+  const [search, setSearch] = useState('')
+  const [weather, setWeather] = useState(null)
 
-  const handleVote = () => {
-    const copy = [...vote]
-    copy[selected] += 1
-    setVote(copy)
-  }
+  useEffect(() => {
+    countriesService.getAllCountries().then(data => {
+      setCountries(data)
+    })
+  }, [])
+
+  const filteredCountries = countries.filter(country => country.name.common.toLowerCase().includes(search.toLowerCase()))
+
+  useEffect(() => {
+    if (search) {
+      if (filteredCountries.length === 1) 
+        countriesService.getWeather(filteredCountries[0].capital).then(data => {
+          setWeather(data)
+        })
+    }
+  }, [filteredCountries])
+
+
   return (
     <div>
-      <button onClick={() => setSelected(Math.floor(Math.random() * anecdotes.length))}>next anecdote</button>
-      <button onClick={handleVote}>vote</button>
-      <p>{anecdotes[selected]}</p>
-      <p>votes: {vote[selected]}</p>
-      <h1>Anecdote with most votes</h1>
-      <p>{anecdotes[vote.indexOf(Math.max(...vote))]}</p>
-      <p>has {Math.max(...vote)} votes</p>
+      <Filter searchTerm={search} setSearchTerm={setSearch} />
+      <h2>Countries</h2>
+      {filteredCountries.length === 0 && <p>No matches found.</p>}
+      {filteredCountries.length === 1 && (
+        <div>
+          <h3>{filteredCountries[0].name.common}</h3>
+          <p>Capital: {filteredCountries[0].capital}</p>
+          <p>Population: {filteredCountries[0].population}</p>
+          <p>Languages: {Object.values(filteredCountries[0].languages).join(', ')}</p>
+          <p>Area: {filteredCountries[0].area}</p>
+          <img src={filteredCountries[0].flags.png} alt={`Flag of ${filteredCountries[0].name.common}`} width="150" />
+        </div>
+      )}
+      {filteredCountries.length < 10 ? (
+        filteredCountries.map(country => (
+          <div key={country.cca3}>
+            {country.name.common} <button onClick={() => setSearch(country.name.common)}>show</button>
+          </div>
+        ))
+      ) : (
+        <p>Too many matches. Please be more specific.</p>
+      )}
+      {filteredCountries.length === 1 && (
+        <div>
+          <h3>Weather in {filteredCountries[0].capital}</h3>
+          <p>Temperature: {weather?.main.temp} °C</p>
+          <p>Wind: {weather?.wind.speed} m/s</p>
+        </div>
+      )}
     </div>
   )
 }
-
 export default App
