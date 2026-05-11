@@ -4,6 +4,7 @@ import Filter from './components/search'
 import PersonForm from './components/person_Form'
 import Persons from './components/Person'
 import personService from './services/persons'
+import Notification from './components/Notification'
 
 const App = () => {
   const [persons, setPersons] = useState([])
@@ -12,14 +13,18 @@ const App = () => {
     name: '',
     number: ''
   })
+  const [message, setMessage] = useState(null)
+
+  const [isError, setIsError] = useState(false)
+
   useEffect(() => {
     personService.getAll().then(data => {
       setPersons(data)
     })
   }, [])
+
   
   const [searchTerm, setSearchTerm] = useState('')
-
   const handleSubmit = (event) => {
     event.preventDefault()
 
@@ -28,9 +33,26 @@ const App = () => {
         const personToUpdate = persons.find(person => person.name === newPerson.name)
         personService.update(personToUpdate.id, { ...personToUpdate, number: newPerson.number }).then(data => {
           setPersons(persons.map(person => person.id === data.id ? data : person))
+        }).catch(error => {
+          setIsError(true)
+          setMessage(`Information of ${newPerson.name} has already been removed from server`)
+          setTimeout(() => {
+            setMessage(null)
+            setIsError(false)
+          }, 3000)
+          setPersons(persons.filter(person => person.id !== personToUpdate.id))
         })
+        setMessage(`Updated ${newPerson.name}'s number`)
+        setTimeout(() => {
+          setMessage(null)
+        }, 3000)
       }
     } else {
+      setIsError(false)
+      setMessage(`Added ${newPerson.name}`)
+      setTimeout(() => {
+        setMessage(null)
+      }, 3000)
       setNewPerson({ name: '', number: '' })
       personService.create(newPerson).then(data => {
         setPersons(persons.concat(data))
@@ -54,7 +76,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-
+      <Notification message={message} isError={isError} />
       <Filter
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
