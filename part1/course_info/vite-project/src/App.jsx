@@ -1,64 +1,98 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect} from 'react'
 import axios from 'axios'
-import Note from './components/Note'
-import noteService from './services/notes'
+import Filter from './components/search'
+import PersonForm from './components/person_Form'
+import Persons from './components/Person'
+import personService from './services/persons'
+import Notification from './components/Notification'
 
 const App = () => {
-  const [notes, setNotes] = useState([])
-  const [newNote, setNewNote] = useState('')
-  const [showAll, setShowAll] = useState(true)
+  const [persons, setPersons] = useState([])
+
+  const [newPerson, setNewPerson] = useState({
+    name: '',
+    number: ''
+  })
+  const [message, setMessage] = useState(null)
+
+  const [isError, setIsError] = useState(false)
 
   useEffect(() => {
-    noteService.getAll().then((data) => {
-      setNotes(data)
+    personService.getAll().then(data => {
+      setPersons(data)
     })
   }, [])
 
-  const toggleImportanceOf = (id) => {
-    const note = notes.find((n) => n.id === id)
-    const changedNote = { ...note, important: !note.important }
-
-    noteService.update(id, changedNote).then((data) => {
-      setNotes(notes.map((n) => (n.id !== id ? n : data)))
-    })
-  }
-
-  const addNote = (event) => {
+  
+  const [searchTerm, setSearchTerm] = useState('')
+  const handleSubmit = (event) => {
     event.preventDefault()
-    const noteObject = {
-      content: newNote,
-      important: Math.random() > 0.5,
-    }
 
-    noteService.create(noteObject).then((data) => {
-      setNotes(notes.concat(data))
-      setNewNote('')
+    if (persons.some(person => person.name === newPerson.name)) {
+      if (window.confirm(`${newPerson.name} is already added to phonebook, want to update the number?`)) {
+        const personToUpdate = persons.find(person => person.name === newPerson.name)
+        personService.update(personToUpdate.id, { ...personToUpdate, number: newPerson.number }).then(data => {
+          setPersons(persons.map(person => person.id === data.id ? data : person))
+        }).catch(error => {
+          setIsError(true)
+          setMessage(`Information of ${newPerson.name} has already been removed from server`)
+          setTimeout(() => {
+            setMessage(null)
+            setIsError(false)
+          }, 3000)
+          setPersons(persons.filter(person => person.id !== personToUpdate.id))
+        })
+        setMessage(`Updated ${newPerson.name}'s number`)
+        setTimeout(() => {
+          setMessage(null)
+        }, 3000)
+      }
+    } else {
+      setIsError(false)
+      setMessage(`Added ${newPerson.name}`)
+      setTimeout(() => {
+        setMessage(null)
+      }, 3000)
+      setNewPerson({ name: '', number: '' })
+      personService.create(newPerson).then(data => {
+        setPersons(persons.concat(data))
+      })
+    }
+  }
+
+  const handleDelete = (id) => {
+    if (!window.confirm('Are you sure you want to delete this person?')) {
+      return
+    }
+    personService.remove(id).then(() => {
+      setPersons(persons.filter(person => person.id !== id))
     })
   }
 
-  const handleNoteChange = (event) => {
-    setNewNote(event.target.value)
-  }
-
-  const notesToShow = showAll ? notes : notes.filter((note) => note.important)
+  const filteredPersons = persons.filter(person =>
+    person.name.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
   return (
     <div>
-      <h1>Notes</h1>
-      <div>
-        <button onClick={() => setShowAll(!showAll)}>
-          show {showAll ? 'important' : 'all'}
-        </button>
-      </div>
-      <ul>
-        {notesToShow.map((note) => (
-          <Note key={note.id} note={note} toggleImportance={() => toggleImportanceOf(note.id)} />
-        ))}
-      </ul>
-      <form onSubmit={addNote}>
-        <input value={newNote} onChange={handleNoteChange} />
-        <button type="submit">save</button>
-      </form>
+      <h2>Phonebook</h2>
+      <Notification message={message} isError={isError} />
+      <Filter
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+      />
+
+      <h2>Add a new</h2>
+
+      <PersonForm
+        handleSubmit={handleSubmit}
+        newPerson={newPerson}
+        setNewPerson={setNewPerson}
+      />
+
+      <h2>Numbers</h2>
+
+      <Persons persons={filteredPersons} handleDelete={handleDelete} />
     </div>
   )
 }
