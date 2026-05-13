@@ -12,8 +12,16 @@ mongoose.connect(url, { family: 4 }).then(() => {
 
 
 const phoneSchema = new mongoose.Schema({
-  name: String,
-  number: String,
+  name: {
+    type: String,
+    minlength: 3,
+    maxlength: 100
+  },
+  number: {
+    type: String,
+    minlength: 4,
+    maxlength: 100
+  }
 })
 
 phoneSchema.set('toJSON', {
