@@ -51,19 +51,19 @@ const App = () => {
       setNewPerson({ name: '', number: '' })
       personService.create(newPerson).then(data => {
         setPersons(persons.concat(data))
+        setIsError(false)
+        setMessage(`Added ${newPerson.name}`)
+        setTimeout(() => {
+          setMessage(null)
+        }, 3000)
       }).catch(error => {
         setIsError(true)
         setMessage(error.response.data.error)
         setTimeout(() => {
           setMessage(null)
           setIsError(false)
-        }, 3000)
+        }, 3000)  
       })
-      setIsError(false)
-      setMessage(`Added ${newPerson.name}`)
-      setTimeout(() => {
-        setMessage(null)
-      }, 3000)
     }
   }
 
