@@ -136,6 +136,27 @@ test.only('Deafult value of likes is 0', async () => {
   assert.strictEqual(addedBlog.likes, 0)
 })
 
+test.only('A blog can be updated', async () => {
+  const blogsAtStart = await helper.blogsInDb()
+  const blogToUpdate = blogsAtStart[0]
+
+  const updatedBlog = {
+    title: 'Updated Blog Title',
+    author: 'Updated Author',
+    url: 'https://example.com/updated-blog',
+    likes: 10
+  }
+
+  await api
+    .put(`/api/blogs/${blogToUpdate.id}`)
+    .send(updatedBlog)
+    .expect(200)
+    .expect('Content-Type', /application\/json/)
+
+  const blogsAtEnd = await helper.blogsInDb()
+  const blog = blogsAtEnd.find(b => b.id === blogToUpdate.id)
+  assert.deepStrictEqual(blog, { ...blogToUpdate, ...updatedBlog })
+})
 
 after(async () => {
   await mongoose.connection.close()
