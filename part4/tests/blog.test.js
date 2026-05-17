@@ -38,7 +38,7 @@ test.only('a specific Blog is within the returned blogs', async () => {
 test.only('a valid Blog can be added', async () => {
   const newBlog = {
     title: 'My third blog',
-    author: 'John McClane',
+    user: '6a08adeef5bff30967439011',
     url: 'https://example.com/blog3',
     likes: 3
   }
@@ -58,7 +58,7 @@ test.only('a valid Blog can be added', async () => {
 
 test.only('blog without title is not added', async () => {
   const newBlog = {
-    author: 'John McClane',
+    user: '6a08adeef5bff30967439011',
     url: 'https://example.com/blog3',
     likes: 3
   }
@@ -75,7 +75,7 @@ test.only('blog without title is not added', async () => {
 test.only('blog without url is not added', async () => {
   const newBlog = {
     title: 'My fifth blog',
-    author: 'John McClane',
+    user: '6a08adeef5bff30967439011',
     likes: 5
   }
 
@@ -121,7 +121,7 @@ test.only('A blog can be deleted', async () => {
 test.only('Deafult value of likes is 0', async () => {
   const newBlog = {
     title: 'My fourth blog',
-    author: 'John McClane',
+    user: '6a08adeef5bff30967439011',
     url: 'https://example.com/blog4'
   }
 
@@ -142,7 +142,7 @@ test.only('A blog can be updated', async () => {
 
   const updatedBlog = {
     title: 'Updated Blog Title',
-    author: 'Updated Author',
+    user: '6a08adeef5bff30967439011',
     url: 'https://example.com/updated-blog',
     likes: 10
   }
@@ -155,7 +155,16 @@ test.only('A blog can be updated', async () => {
 
   const blogsAtEnd = await helper.blogsInDb()
   const blog = blogsAtEnd.find(b => b.id === blogToUpdate.id)
-  assert.deepStrictEqual(blog, { ...blogToUpdate, ...updatedBlog })
+  assert.deepStrictEqual(
+    {
+      ...blog,
+      user: blog.user.toString()
+    },
+    {
+      ...blogToUpdate,
+      ...updatedBlog
+    }
+  )
 })
 
 after(async () => {

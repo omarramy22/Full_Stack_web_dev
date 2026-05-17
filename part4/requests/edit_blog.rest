@@ -1,0 +1,8 @@
+PUT http://localhost:3003/api/blogs/6a05ba399fcd7d8480b8a1c2
+
+{
+  "title": "Updated Blog Title",
+  "author": "Updated Author",
+  "url": "http://updatedblogurl.com",
+  "likes": 42
+}

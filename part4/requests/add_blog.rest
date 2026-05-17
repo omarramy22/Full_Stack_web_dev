@@ -1,9 +1,10 @@
 POST http://localhost:3003/api/blogs
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImpvaG5fZG9lIiwiaWQiOiI2YTA4ZDM4NjEyOTU4ZDk4MmI1YTkxZmYiLCJpYXQiOjE3NzkwMzYzODcsImV4cCI6MTc3OTAzOTk4N30.bbiPc2nu_D09-HwOaJisGRuK0_Pl2d3ITzqSXXXuKrM
 
 {
-  "title": "My second blog",
-  "author": "John Smith",
-  "url": "http://example.com/my-second-blog",
+  "title": "My Fifth blog",
+  "user": "6a08d38612958d982b5a91ff",
+  "url": "http://example.com/my-fifth-blog",
   "likes": 3
 }
