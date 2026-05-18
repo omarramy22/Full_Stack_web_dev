@@ -4,6 +4,8 @@ import Filter from './components/search'
 import PersonForm from './components/person_Form'
 import Persons from './components/Person'
 import personService from './services/persons'
+import noteService from './services/notes'
+import loginService from './services/login'
 import Notification from './components/Notification'
 
 const App = () => {
@@ -57,6 +59,23 @@ const App = () => {
       personService.create(newPerson).then(data => {
         setPersons(persons.concat(data))
       })
+    }
+  }
+  const handleLogin = async (event) => {
+    event.preventDefault()
+    try {
+      const user = await loginService.login(newUser)
+      window.localStorage.setItem('loggedPhonebookUser', JSON.stringify(user))
+      noteService.setToken(user.token)
+      setUser(user)
+      setNewUser({ username: '', password: '' })
+    } catch (error) {
+      setIsError(true)
+      setMessage('Wrong credentials')
+      setTimeout(() => {
+        setMessage(null)
+        setIsError(false)
+      }, 3000)
     }
   }
 
