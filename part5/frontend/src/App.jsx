@@ -5,6 +5,7 @@ import blogService from './services/blogs'
 import Notification from './components/Notification'
 import loginService from './services/login'
 import Login from './components/login'
+import Togglable from './components/toggable'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
@@ -13,16 +14,13 @@ const App = () => {
     username: '',
     password: ''
   })
-  const [newBlog, setNewBlog] = useState({
-    title: '',
-    url: '', 
-  })
+
   const [message, setmessage] = useState(null)
   const [isError, setisError] = useState(false)
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
-      setBlogs( blogs )
+      setBlogs( blogs.slice().sort((a, b) => b.likes - a.likes))
     )  
   }, [])
 
@@ -59,23 +57,11 @@ const App = () => {
       }, 5000)
     }
   }
-  const handleSubmit = async (event) => {
-  event.preventDefault()
+  const createBlog = async (blogObject) => {
   try {
-    const blogObject = {
-      title: newBlog.title,
-      url: newBlog.url,
-      likes: 0
-    }
-    const returnedBlog =
-      await blogService.create(blogObject)
+    const returnedBlog = await blogService.create(blogObject)
 
     setBlogs(blogs.concat(returnedBlog))
-
-    setNewBlog({
-      title: '',
-      url: ''
-    })
 
     setmessage('Blog created successfully')
     setisError(false)
@@ -95,6 +81,46 @@ const App = () => {
     console.log(exception)
   }
 }
+const handleLike = async (blog) => {
+  try {
+    const updatedBlog = await blogService.update(blog.id, { ...blog, likes: blog.likes + 1 })
+    setBlogs(blogs.slice().sort((a, b) => b.likes - a.likes).map(b => b.id === blog.id ? updatedBlog : b))
+    setmessage(`You liked ${blog.title}`)
+    setisError(false)
+    setTimeout(() => {
+      setmessage(null)
+    }, 5000)
+  } catch (exception) {
+    console.log(exception)
+    setmessage('Error liking the blog, try again later')
+    setisError(true)
+    setTimeout(() => {
+      setmessage(null)
+      setisError(false)
+    }, 5000)
+  }
+}
+const handleRemove = async (blog) => {
+  if (window.confirm(`Are you sure you want to remove ${blog.title} by ${blog.user.username}?`)) {
+    try {
+      await blogService.remove(blog.id)
+      setBlogs(blogs.filter(b => b.id !== blog.id))
+      setmessage('Blog removed successfully')
+      setisError(false)
+      setTimeout(() => {
+        setmessage(null)
+      }, 5000)
+    } catch (exception) {
+      console.log(exception)
+      setmessage('Error removing the blog, try again later')
+      setisError(true)
+      setTimeout(() => {
+        setmessage(null)
+        setisError(false)
+      }, 5000)
+    }
+  }
+}
   return (
     <div>
       <Notification message={message} isError={isError} />
@@ -107,10 +133,11 @@ const App = () => {
           }}>Logout</button>
           <h2>blogs</h2>
           {blogs.map(blog =>
-            <Blog key={blog.id} blog={blog} />
+            <Blog key={blog.id} blog={blog} handleLike={handleLike} handleRemove={handleRemove} />
           )}
-          <h2>create new</h2>
-          <NewBlog newBlog={newBlog} setNewBlog={setNewBlog} handleSubmit={handleSubmit} />
+          <Togglable buttonLabel='Create new blog'>
+            <NewBlog createBlog={createBlog} />
+          </Togglable>
         </>
       )}  {!user && (
         <>

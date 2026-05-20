@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const { default: blogs } = require('../../frontend/src/services/blogs')
 
 const userSchema = new mongoose.Schema({
   username: {
@@ -16,7 +17,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  notes: [
+  blogs: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Blog'
