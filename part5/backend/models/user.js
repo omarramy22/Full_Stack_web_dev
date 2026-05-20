@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-const { default: blogs } = require('../../frontend/src/services/blogs')
 
 const userSchema = new mongoose.Schema({
   username: {

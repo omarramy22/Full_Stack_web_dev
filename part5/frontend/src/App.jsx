@@ -61,7 +61,7 @@ const App = () => {
   try {
     const returnedBlog = await blogService.create(blogObject)
 
-    setBlogs(blogs.concat(returnedBlog))
+    setBlogs(prevBlogs => prevBlogs.concat(returnedBlog))
 
     setmessage('Blog created successfully')
     setisError(false)
@@ -84,7 +84,7 @@ const App = () => {
 const handleLike = async (blog) => {
   try {
     const updatedBlog = await blogService.update(blog.id, { ...blog, likes: blog.likes + 1 })
-    setBlogs(blogs.slice().sort((a, b) => b.likes - a.likes).map(b => b.id === blog.id ? updatedBlog : b))
+    setBlogs(prevBlogs => prevBlogs.map(b => b.id === blog.id ? updatedBlog : b).sort((a, b) => b.likes - a.likes))
     setmessage(`You liked ${blog.title}`)
     setisError(false)
     setTimeout(() => {
@@ -104,7 +104,7 @@ const handleRemove = async (blog) => {
   if (window.confirm(`Are you sure you want to remove ${blog.title} by ${blog.user.username}?`)) {
     try {
       await blogService.remove(blog.id)
-      setBlogs(blogs.filter(b => b.id !== blog.id))
+      setBlogs(prevBlogs => prevBlogs.filter(b => b.id !== blog.id))
       setmessage('Blog removed successfully')
       setisError(false)
       setTimeout(() => {
@@ -133,7 +133,7 @@ const handleRemove = async (blog) => {
           }}>Logout</button>
           <h2>blogs</h2>
           {blogs.map(blog =>
-            <Blog key={blog.id} blog={blog} handleLike={handleLike} handleRemove={handleRemove} />
+            <Blog key={blog.id} blog={blog} handleLike={handleLike} handleRemove={handleRemove} user={user} />
           )}
           <Togglable buttonLabel='Create new blog'>
             <NewBlog createBlog={createBlog} />

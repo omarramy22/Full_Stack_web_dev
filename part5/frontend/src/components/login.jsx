@@ -6,6 +6,7 @@ const login = ({ handleLogin, newUser, setNewUser }) => {
                 <div>
                     username:{' '}
                     <input
+                        data-testid="username"
                         value={newUser.username}
                         onChange={(event) =>
                             setNewUser({
@@ -18,6 +19,7 @@ const login = ({ handleLogin, newUser, setNewUser }) => {
                 <div>
                     password:{' '}
                     <input
+                        data-testid="password"
                         type="password"
                         value={newUser.password}
                         onChange={(event) =>

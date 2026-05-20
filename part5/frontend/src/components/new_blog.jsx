@@ -19,6 +19,7 @@ const New_blog = ({createBlog}) => {
             <div>
                 title:{' '}
                 <input
+                    data-testid="title"
                     value={newBlog.title}
                     placeholder='write title here'
                     onChange={(event) =>
@@ -32,6 +33,7 @@ const New_blog = ({createBlog}) => {
             <div>
                 url:{' '}
                 <input
+                    data-testid="url"
                     value={newBlog.url}
                     placeholder='write url here'
                     onChange={(event) =>
